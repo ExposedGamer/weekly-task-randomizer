@@ -28,21 +28,58 @@ export const useSchedule = () => {
   const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS);
   const [schedule, setSchedule] = useState<Record<string, TimeSlot[]>>({});
 
-  const generateDailySchedule = useCallback(() => {
-    const slots: TimeSlot[] = [
-      { start: '08:00', end: '12:00', task: WORK_TASK, isFixed: true },
-      { start: '12:00', end: '13:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
-      { start: '13:00', end: '18:00', task: WORK_TASK, isFixed: true },
-    ];
+  const generateDailySchedule = useCallback((day: string) => {
+    let slots: TimeSlot[] = [];
 
-    // Add evening slots
-    for (let hour = 18; hour < 24; hour++) {
-      slots.push({
-        start: `${hour}:00`,
-        end: `${hour + 1}:00`,
-        task: tasks[Math.floor(Math.random() * tasks.length)],
-        isFixed: false,
-      });
+    if (day === 'Domingo') {
+      // Domingo: sem trabalho, começa às 10h, almoço 12h-14h
+      slots = [
+        { start: '10:00', end: '12:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
+        { start: '12:00', end: '14:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
+      ];
+      
+      // Adiciona slots da tarde/noite
+      for (let hour = 14; hour < 24; hour++) {
+        slots.push({
+          start: `${hour}:00`,
+          end: `${hour + 1}:00`,
+          task: tasks[Math.floor(Math.random() * tasks.length)],
+          isFixed: false,
+        });
+      }
+    } else if (day === 'Sábado') {
+      // Sábado: trabalho 9h-13h
+      slots = [
+        { start: '09:00', end: '13:00', task: WORK_TASK, isFixed: true },
+        { start: '13:00', end: '14:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
+      ];
+      
+      // Adiciona slots da tarde/noite
+      for (let hour = 14; hour < 24; hour++) {
+        slots.push({
+          start: `${hour}:00`,
+          end: `${hour + 1}:00`,
+          task: tasks[Math.floor(Math.random() * tasks.length)],
+          isFixed: false,
+        });
+      }
+    } else {
+      // Dias de semana: trabalho 8h-12h e 13h-18h
+      slots = [
+        { start: '08:00', end: '12:00', task: WORK_TASK, isFixed: true },
+        { start: '12:00', end: '13:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
+        { start: '13:00', end: '18:00', task: WORK_TASK, isFixed: true },
+      ];
+      
+      // Adiciona slots da noite
+      for (let hour = 18; hour < 24; hour++) {
+        slots.push({
+          start: `${hour}:00`,
+          end: `${hour + 1}:00`,
+          task: tasks[Math.floor(Math.random() * tasks.length)],
+          isFixed: false,
+        });
+      }
     }
 
     return slots;
@@ -53,7 +90,7 @@ export const useSchedule = () => {
     const newSchedule: Record<string, TimeSlot[]> = {};
     
     days.forEach(day => {
-      newSchedule[day] = generateDailySchedule();
+      newSchedule[day] = generateDailySchedule(day);
     });
 
     setSchedule(newSchedule);
