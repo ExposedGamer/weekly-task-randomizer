@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 
 export type Task = {
@@ -41,12 +42,21 @@ export const useSchedule = () => {
 
     if (dayCustomSlots.length > 0) {
       // Use custom time slots if available
-      slots = dayCustomSlots.map(slot => ({
-        start: slot.start,
-        end: slot.end,
-        task: tasks[Math.floor(Math.random() * tasks.length)],
-        isFixed: false,
-      }));
+      slots = dayCustomSlots.map(slot => {
+        // Verificar se é um horário de trabalho baseado no dia e horário
+        const isWorkTime = 
+          (day !== 'Domingo' && day !== 'Sábado' && 
+           ((slot.start >= '08:00' && slot.end <= '12:00') || 
+            (slot.start >= '13:00' && slot.end <= '18:00'))) ||
+          (day === 'Sábado' && slot.start >= '09:00' && slot.end <= '13:00');
+
+        return {
+          start: slot.start,
+          end: slot.end,
+          task: isWorkTime ? WORK_TASK : tasks[Math.floor(Math.random() * tasks.length)],
+          isFixed: isWorkTime,
+        };
+      });
     } else if (day === 'Domingo') {
       // Domingo: sem trabalho, começa às 10h, almoço 12h-14h
       slots = [
