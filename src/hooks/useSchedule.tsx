@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 
 export type Task = {
@@ -14,6 +13,13 @@ export type TimeSlot = {
   isFixed: boolean;
 };
 
+export type CustomSchedule = {
+  [day: string]: {
+    start: string;
+    end: string;
+  }[];
+};
+
 const DEFAULT_TASKS = [
   { id: '1', name: 'Assistir Harry Potter', completed: false },
   { id: '2', name: 'Assistir aula do curso', completed: false },
@@ -27,11 +33,21 @@ const WORK_TASK = { id: 'work', name: 'Trabalho', completed: false };
 export const useSchedule = () => {
   const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS);
   const [schedule, setSchedule] = useState<Record<string, TimeSlot[]>>({});
+  const [customTimeSlots, setCustomTimeSlots] = useState<CustomSchedule>({});
 
   const generateDailySchedule = useCallback((day: string) => {
     let slots: TimeSlot[] = [];
+    const dayCustomSlots = customTimeSlots[day] || [];
 
-    if (day === 'Domingo') {
+    if (dayCustomSlots.length > 0) {
+      // Use custom time slots if available
+      slots = dayCustomSlots.map(slot => ({
+        start: slot.start,
+        end: slot.end,
+        task: tasks[Math.floor(Math.random() * tasks.length)],
+        isFixed: false,
+      }));
+    } else if (day === 'Domingo') {
       // Domingo: sem trabalho, começa às 10h, almoço 12h-14h
       slots = [
         { start: '10:00', end: '12:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
@@ -83,7 +99,7 @@ export const useSchedule = () => {
     }
 
     return slots;
-  }, [tasks]);
+  }, [tasks, customTimeSlots]);
 
   const generateWeekSchedule = useCallback(() => {
     const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
@@ -111,11 +127,19 @@ export const useSchedule = () => {
     setTasks(newTasks);
   }, []);
 
+  const updateDaySchedule = useCallback((day: string, newSlots: { start: string; end: string }[]) => {
+    setCustomTimeSlots(prev => ({
+      ...prev,
+      [day]: newSlots,
+    }));
+  }, []);
+
   return {
     tasks,
     schedule,
     updateTasks,
     generateWeekSchedule,
     toggleTaskCompletion,
+    updateDaySchedule,
   };
 };
