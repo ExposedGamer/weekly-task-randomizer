@@ -1,5 +1,4 @@
-
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export type Task = {
   id: string;
@@ -32,18 +31,39 @@ const DEFAULT_TASKS = [
 const WORK_TASK = { id: 'work', name: 'Trabalho', completed: false };
 
 export const useSchedule = () => {
-  const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS);
-  const [schedule, setSchedule] = useState<Record<string, TimeSlot[]>>({});
-  const [customTimeSlots, setCustomTimeSlots] = useState<CustomSchedule>({});
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const savedTasks = localStorage.getItem('tasks');
+    return savedTasks ? JSON.parse(savedTasks) : DEFAULT_TASKS;
+  });
+  
+  const [schedule, setSchedule] = useState<Record<string, TimeSlot[]>>(() => {
+    const savedSchedule = localStorage.getItem('schedule');
+    return savedSchedule ? JSON.parse(savedSchedule) : {};
+  });
+  
+  const [customTimeSlots, setCustomTimeSlots] = useState<CustomSchedule>(() => {
+    const savedCustomSlots = localStorage.getItem('customTimeSlots');
+    return savedCustomSlots ? JSON.parse(savedCustomSlots) : {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  useEffect(() => {
+    localStorage.setItem('schedule', JSON.stringify(schedule));
+  }, [schedule]);
+
+  useEffect(() => {
+    localStorage.setItem('customTimeSlots', JSON.stringify(customTimeSlots));
+  }, [customTimeSlots]);
 
   const generateDailySchedule = useCallback((day: string) => {
     let slots: TimeSlot[] = [];
     const dayCustomSlots = customTimeSlots[day] || [];
 
     if (dayCustomSlots.length > 0) {
-      // Use custom time slots if available
       slots = dayCustomSlots.map(slot => {
-        // Verificar se é um horário de trabalho baseado no dia e horário
         const isWorkTime = 
           (day !== 'Domingo' && day !== 'Sábado' && 
            ((slot.start >= '08:00' && slot.end <= '12:00') || 
@@ -58,13 +78,11 @@ export const useSchedule = () => {
         };
       });
     } else if (day === 'Domingo') {
-      // Domingo: sem trabalho, começa às 10h, almoço 12h-14h
       slots = [
         { start: '10:00', end: '12:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
         { start: '12:00', end: '14:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
       ];
       
-      // Adiciona slots da tarde/noite
       for (let hour = 14; hour < 24; hour++) {
         slots.push({
           start: `${hour}:00`,
@@ -74,13 +92,11 @@ export const useSchedule = () => {
         });
       }
     } else if (day === 'Sábado') {
-      // Sábado: trabalho 9h-13h
       slots = [
         { start: '09:00', end: '13:00', task: WORK_TASK, isFixed: true },
         { start: '13:00', end: '14:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
       ];
       
-      // Adiciona slots da tarde/noite
       for (let hour = 14; hour < 24; hour++) {
         slots.push({
           start: `${hour}:00`,
@@ -90,14 +106,12 @@ export const useSchedule = () => {
         });
       }
     } else {
-      // Dias de semana: trabalho 8h-12h e 13h-18h
       slots = [
         { start: '08:00', end: '12:00', task: WORK_TASK, isFixed: true },
         { start: '12:00', end: '13:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false },
         { start: '13:00', end: '18:00', task: WORK_TASK, isFixed: true },
       ];
       
-      // Adiciona slots da noite
       for (let hour = 18; hour < 24; hour++) {
         slots.push({
           start: `${hour}:00`,
@@ -123,14 +137,17 @@ export const useSchedule = () => {
   }, [generateDailySchedule]);
 
   const toggleTaskCompletion = useCallback((day: string, slotIndex: number) => {
-    setSchedule(prev => ({
-      ...prev,
-      [day]: prev[day].map((slot, idx) => 
-        idx === slotIndex && slot.task
-          ? { ...slot, task: { ...slot.task, completed: !slot.task.completed } }
-          : slot
-      ),
-    }));
+    setSchedule(prev => {
+      const newSchedule = {
+        ...prev,
+        [day]: prev[day].map((slot, idx) => 
+          idx === slotIndex && slot.task
+            ? { ...slot, task: { ...slot.task, completed: !slot.task.completed } }
+            : slot
+        ),
+      };
+      return newSchedule;
+    });
   }, []);
 
   const updateTasks = useCallback((newTasks: Task[]) => {

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import WeekSchedule from "@/components/WeekSchedule";
 import TaskEditor from "@/components/TaskEditor";
 import { useSchedule } from "@/hooks/useSchedule";
-import { Shuffle } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 import { useState } from "react";
 
 const Index = () => {
@@ -22,8 +22,8 @@ const Index = () => {
                 variant="outline"
                 className="flex items-center gap-2"
               >
-                <Shuffle size={18} />
-                Sortear Novamente
+                <CalendarPlus size={18} />
+                Nova Semana
               </Button>
               <Button
                 onClick={() => setShowEditor(!showEditor)}
