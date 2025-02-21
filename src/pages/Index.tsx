@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import WeekSchedule from "@/components/WeekSchedule";
 import TaskEditor from "@/components/TaskEditor";
+import Navigation from "@/components/Navigation";
 import { useSchedule } from "@/hooks/useSchedule";
 import { CalendarPlus } from "lucide-react";
 import { useState } from "react";
@@ -12,6 +13,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navigation />
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
