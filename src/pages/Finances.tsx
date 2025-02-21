@@ -38,6 +38,7 @@ const Finances = () => {
 
     setNewExpenseName("");
     setNewExpenseAmount("");
+    updateSimulatedExpense(null);
     toast.success("Gasto fixo adicionado com sucesso!");
   };
 
@@ -65,18 +66,24 @@ const Finances = () => {
 
       <main className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Adicionar Gasto Fixo</h2>
+          <h2 className="text-lg font-semibold mb-4">Gerenciar Gastos</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <Input
               placeholder="Nome do gasto"
               value={newExpenseName}
-              onChange={(e) => setNewExpenseName(e.target.value)}
+              onChange={(e) => {
+                setNewExpenseName(e.target.value);
+                handleSimulateExpense(e.target.value, newExpenseAmount);
+              }}
             />
             <Input
               type="number"
               placeholder="Valor (R$)"
               value={newExpenseAmount}
-              onChange={(e) => setNewExpenseAmount(e.target.value)}
+              onChange={(e) => {
+                setNewExpenseAmount(e.target.value);
+                handleSimulateExpense(newExpenseName, e.target.value);
+              }}
             />
           </div>
           <Button
@@ -84,35 +91,8 @@ const Finances = () => {
             className="w-full md:w-auto flex items-center gap-2"
           >
             <PlusCircle size={18} />
-            Adicionar Gasto Fixo
+            Adicionar aos Gastos Fixos
           </Button>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Simulação de Novo Gasto</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              placeholder="Nome do gasto"
-              value={simulatedExpense?.name || ""}
-              onChange={(e) =>
-                handleSimulateExpense(
-                  e.target.value,
-                  simulatedExpense?.amount?.toString() || ""
-                )
-              }
-            />
-            <Input
-              type="number"
-              placeholder="Valor (R$)"
-              value={simulatedExpense?.amount || ""}
-              onChange={(e) =>
-                handleSimulateExpense(
-                  simulatedExpense?.name || "",
-                  e.target.value
-                )
-              }
-            />
-          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow divide-y">
