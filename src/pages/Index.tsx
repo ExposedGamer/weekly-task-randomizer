@@ -7,7 +7,7 @@ import { CalendarPlus } from "lucide-react";
 import { useState } from "react";
 
 const Index = () => {
-  const { tasks, schedule, updateTasks, generateWeekSchedule, toggleTaskCompletion, updateDaySchedule } = useSchedule();
+  const { tasks, schedule, weekHistory, updateTasks, generateWeekSchedule, toggleTaskCompletion, updateDaySchedule } = useSchedule();
   const [showEditor, setShowEditor] = useState(false);
 
   return (
@@ -42,6 +42,7 @@ const Index = () => {
         ) : (
           <WeekSchedule
             schedule={schedule}
+            weekHistory={weekHistory}
             onToggleTask={toggleTaskCompletion}
             onRegenerate={generateWeekSchedule}
             onUpdateSchedule={updateDaySchedule}

@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 
 export type Task = {
@@ -18,6 +19,14 @@ export type CustomSchedule = {
     start: string;
     end: string;
   }[];
+};
+
+export type WeekHistory = {
+  id: string;
+  date: string;
+  schedule: Record<string, TimeSlot[]>;
+  completedTasks: number;
+  totalTasks: number;
 };
 
 const DEFAULT_TASKS = [
@@ -46,6 +55,11 @@ export const useSchedule = () => {
     return savedCustomSlots ? JSON.parse(savedCustomSlots) : {};
   });
 
+  const [weekHistory, setWeekHistory] = useState<WeekHistory[]>(() => {
+    const savedHistory = localStorage.getItem('weekHistory');
+    return savedHistory ? JSON.parse(savedHistory) : [];
+  });
+
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
@@ -57,6 +71,10 @@ export const useSchedule = () => {
   useEffect(() => {
     localStorage.setItem('customTimeSlots', JSON.stringify(customTimeSlots));
   }, [customTimeSlots]);
+
+  useEffect(() => {
+    localStorage.setItem('weekHistory', JSON.stringify(weekHistory));
+  }, [weekHistory]);
 
   const generateDailySchedule = useCallback((day: string) => {
     let slots: TimeSlot[] = [];
@@ -126,6 +144,26 @@ export const useSchedule = () => {
   }, [tasks, customTimeSlots]);
 
   const generateWeekSchedule = useCallback(() => {
+    // Salvar a semana atual no histórico antes de gerar uma nova
+    if (Object.keys(schedule).length > 0) {
+      const completedTasks = Object.values(schedule).flat().reduce((acc, slot) => {
+        return acc + (slot.task?.completed ? 1 : 0);
+      }, 0);
+
+      const totalTasks = Object.values(schedule).flat().length;
+
+      const weekData: WeekHistory = {
+        id: Date.now().toString(),
+        date: new Date().toLocaleDateString('pt-BR'),
+        schedule: schedule,
+        completedTasks,
+        totalTasks
+      };
+
+      setWeekHistory(prev => [weekData, ...prev]);
+    }
+
+    // Gerar nova semana
     const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
     const newSchedule: Record<string, TimeSlot[]> = {};
     
@@ -134,7 +172,7 @@ export const useSchedule = () => {
     });
 
     setSchedule(newSchedule);
-  }, [generateDailySchedule]);
+  }, [generateDailySchedule, schedule]);
 
   const toggleTaskCompletion = useCallback((day: string, slotIndex: number) => {
     setSchedule(prev => {
@@ -164,6 +202,7 @@ export const useSchedule = () => {
   return {
     tasks,
     schedule,
+    weekHistory,
     updateTasks,
     generateWeekSchedule,
     toggleTaskCompletion,
