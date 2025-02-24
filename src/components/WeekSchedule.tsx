@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { TimeSlot, WeekHistory } from '@/hooks/useSchedule';
 import { Checkbox } from "@/components/ui/checkbox";
@@ -65,31 +66,34 @@ const WeekSchedule = ({ schedule, onToggleTask, onRegenerate, onUpdateSchedule, 
       )}
 
       {showHistory && weekHistory.length > 0 && (
-        <div className="mb-8 bg-white rounded-lg shadow-sm p-6">
+        <div className="mb-8 bg-white rounded-lg shadow-sm p-6 overflow-x-auto">
           <h2 className="text-xl font-semibold mb-4">Histórico de Semanas</h2>
-          <div className="space-y-4">
+          <div className="flex gap-4 pb-4 overflow-x-auto">
             {weekHistory.map((week) => (
-              <div key={week.id} className="border-b pb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium">Semana de {week.date}</span>
-                  <span className="text-sm text-gray-500">
+              <div 
+                key={week.id} 
+                className="flex-shrink-0 w-[300px] bg-gray-50 p-4 rounded-lg border border-gray-100"
+              >
+                <div className="mb-2">
+                  <div className="font-medium text-gray-900">Semana de {week.date}</div>
+                  <div className="text-sm text-gray-500 mt-1">
                     {week.completedTasks} de {week.totalTasks} tarefas completadas (
                     {Math.round((week.completedTasks / week.totalTasks) * 100)}%)
-                  </span>
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="space-y-2">
                   {Object.entries(week.schedule).map(([day, slots]) => (
-                    <div key={day} className="bg-gray-50 p-3 rounded-md">
-                      <h3 className="font-medium mb-2">{day}</h3>
-                      <div className="space-y-2">
+                    <div key={day} className="bg-white p-2 rounded-md">
+                      <h3 className="text-sm font-medium text-gray-700 mb-1">{day}</h3>
+                      <div className="space-y-1">
                         {slots.map((slot, index) => (
                           <div
                             key={index}
-                            className={`text-sm p-2 rounded ${
-                              slot.task?.completed ? 'bg-green-50' : 'bg-white'
+                            className={`text-xs p-1 rounded ${
+                              slot.task?.completed ? 'bg-green-50' : 'bg-gray-50'
                             }`}
                           >
-                            <div className="flex justify-between">
+                            <div className="flex justify-between items-center">
                               <span className="text-gray-600">
                                 {slot.start} - {slot.end}
                               </span>
@@ -97,7 +101,7 @@ const WeekSchedule = ({ schedule, onToggleTask, onRegenerate, onUpdateSchedule, 
                                 <span className="text-green-600">✓</span>
                               )}
                             </div>
-                            <p className={`${slot.task?.completed ? 'line-through text-gray-400' : ''}`}>
+                            <p className={`truncate ${slot.task?.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
                               {slot.task?.name}
                             </p>
                           </div>
