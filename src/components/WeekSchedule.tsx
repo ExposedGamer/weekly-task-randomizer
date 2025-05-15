@@ -237,20 +237,19 @@ const WeekSchedule = ({
                           {slot.start} - {slot.end}
                         </span>
                         <div className="flex items-center gap-2">
-                          {!slot.isFixed || slot.isBlocked ? (
-                            <motion.div
-                              whileTap={{ scale: 0.9 }}
-                              className="cursor-pointer"
-                              onClick={() => onToggleBlocked && onToggleBlocked(day, slotIndex)}
-                              title={slot.isBlocked ? "Desbloquear horário" : "Bloquear horário"}
-                            >
-                              {slot.isBlocked ? (
-                                <Lock size={16} className="text-amber-600" />
-                              ) : (
-                                <LockOpen size={16} className="text-gray-400 hover:text-amber-600" />
-                              )}
-                            </motion.div>
-                          ) : null}
+                          {/* Always show lock icons for all slots */}
+                          <motion.div
+                            whileTap={{ scale: 0.9 }}
+                            className="cursor-pointer"
+                            onClick={() => onToggleBlocked && onToggleBlocked(day, slotIndex)}
+                            title={slot.isBlocked ? "Desbloquear horário" : "Bloquear horário"}
+                          >
+                            {slot.isBlocked ? (
+                              <Lock size={16} className="text-amber-600" />
+                            ) : (
+                              <LockOpen size={16} className="text-gray-400 hover:text-amber-600" />
+                            )}
+                          </motion.div>
                           {slot.task && (
                             <motion.div
                               whileTap={{ scale: 0.9 }}

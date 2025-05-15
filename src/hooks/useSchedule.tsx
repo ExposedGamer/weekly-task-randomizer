@@ -11,7 +11,7 @@ export type TimeSlot = {
   end: string;
   task: Task | null;
   isFixed: boolean;
-  isBlocked: boolean; // New property to track blocked slots
+  isBlocked: boolean; // Property to track blocked slots
 };
 
 export type CustomSchedule = {
@@ -81,11 +81,14 @@ export const useSchedule = () => {
     const dayCustomSlots = customTimeSlots[day] || [];
     const currentDaySchedule = schedule[day] || [];
 
+    // Find all blocked slots from the current schedule
+    const blockedSlots = currentDaySchedule.filter(slot => slot.isBlocked);
+
     if (dayCustomSlots.length > 0) {
       slots = dayCustomSlots.map(slot => {
         // Check if this time slot was blocked in the previous schedule
-        const existingSlot = currentDaySchedule.find(
-          existing => existing.start === slot.start && existing.end === slot.end && existing.isBlocked
+        const existingSlot = blockedSlots.find(
+          blocked => blocked.start === slot.start && blocked.end === slot.end
         );
         
         const isWorkTime = 
@@ -100,8 +103,8 @@ export const useSchedule = () => {
             start: slot.start,
             end: slot.end,
             task: existingSlot.task,
-            isFixed: isWorkTime || existingSlot.isBlocked,
-            isBlocked: existingSlot.isBlocked,
+            isFixed: true,
+            isBlocked: true,
           };
         }
 
@@ -114,9 +117,6 @@ export const useSchedule = () => {
         };
       });
     } else if (day === 'Domingo') {
-      // Check for blocked slots from previous schedule
-      const blockedSlots = currentDaySchedule.filter(slot => slot.isBlocked);
-      
       slots = [
         { start: '10:00', end: '12:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false, isBlocked: false },
         { start: '12:00', end: '14:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false, isBlocked: false },
@@ -147,9 +147,6 @@ export const useSchedule = () => {
         }
       }
     } else if (day === 'Sábado') {
-      // Check for blocked slots from previous schedule
-      const blockedSlots = currentDaySchedule.filter(slot => slot.isBlocked);
-      
       slots = [
         { start: '09:00', end: '13:00', task: WORK_TASK, isFixed: true, isBlocked: false },
         { start: '13:00', end: '14:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false, isBlocked: false },
@@ -180,9 +177,6 @@ export const useSchedule = () => {
         }
       }
     } else {
-      // Check for blocked slots from previous schedule
-      const blockedSlots = currentDaySchedule.filter(slot => slot.isBlocked);
-      
       slots = [
         { start: '08:00', end: '12:00', task: WORK_TASK, isFixed: true, isBlocked: false },
         { start: '12:00', end: '13:00', task: tasks[Math.floor(Math.random() * tasks.length)], isFixed: false, isBlocked: false },
