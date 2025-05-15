@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from 'framer-motion';
-import { Edit2, Save, Clock } from 'lucide-react';
+import { Edit2, Save, Clock, Lock, LockOpen } from 'lucide-react';
 
 interface WeekScheduleProps {
   schedule: Record<string, TimeSlot[]>;
@@ -13,9 +13,17 @@ interface WeekScheduleProps {
   onRegenerate: () => void;
   onUpdateSchedule: (day: string, slots: { start: string; end: string }[]) => void;
   weekHistory?: WeekHistory[];
+  onToggleBlocked?: (day: string, slotIndex: number) => void;
 }
 
-const WeekSchedule = ({ schedule, onToggleTask, onRegenerate, onUpdateSchedule, weekHistory = [] }: WeekScheduleProps) => {
+const WeekSchedule = ({ 
+  schedule, 
+  onToggleTask, 
+  onRegenerate, 
+  onUpdateSchedule, 
+  weekHistory = [],
+  onToggleBlocked 
+}: WeekScheduleProps) => {
   const [editingDay, setEditingDay] = useState<string | null>(null);
   const [editedSlots, setEditedSlots] = useState<{ start: string; end: string }[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -221,24 +229,40 @@ const WeekSchedule = ({ schedule, onToggleTask, onRegenerate, onUpdateSchedule, 
                         transition: { duration: 0.2 }
                       }}
                       className={`p-3 rounded-md transform-gpu ${
-                        slot.isFixed ? 'bg-gray-50' : 'bg-[#fff5f5]'
+                        slot.isBlocked ? 'bg-amber-50' : slot.isFixed ? 'bg-gray-50' : 'bg-[#fff5f5]'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-medium text-gray-500">
                           {slot.start} - {slot.end}
                         </span>
-                        {slot.task && (
-                          <motion.div
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <Checkbox
-                              checked={slot.task.completed}
-                              onCheckedChange={() => onToggleTask(day, slotIndex)}
-                              className="border-[#ea384c] data-[state=checked]:bg-[#ea384c]"
-                            />
-                          </motion.div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {!slot.isFixed || slot.isBlocked ? (
+                            <motion.div
+                              whileTap={{ scale: 0.9 }}
+                              className="cursor-pointer"
+                              onClick={() => onToggleBlocked && onToggleBlocked(day, slotIndex)}
+                              title={slot.isBlocked ? "Desbloquear horário" : "Bloquear horário"}
+                            >
+                              {slot.isBlocked ? (
+                                <Lock size={16} className="text-amber-600" />
+                              ) : (
+                                <LockOpen size={16} className="text-gray-400 hover:text-amber-600" />
+                              )}
+                            </motion.div>
+                          ) : null}
+                          {slot.task && (
+                            <motion.div
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <Checkbox
+                                checked={slot.task.completed}
+                                onCheckedChange={() => onToggleTask(day, slotIndex)}
+                                className="border-[#ea384c] data-[state=checked]:bg-[#ea384c]"
+                              />
+                            </motion.div>
+                          )}
+                        </div>
                       </div>
                       {slot.task && (
                         <motion.p
